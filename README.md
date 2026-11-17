@@ -1,178 +1,240 @@
 # Marketing Campaign Response Prediction & Customer Targeting
 
-A machine-learning portfolio project that predicts whether a bank customer will subscribe to a term deposit after a direct-marketing campaign. It combines exploratory data analysis, feature engineering, preprocessing, classification, model evaluation and business interpretation.
+A machine learning project that predicts whether a bank customer is likely to subscribe to a term deposit following a direct-marketing campaign. The project uses exploratory data analysis, feature engineering, data preprocessing, classification models and model evaluation to identify customer-response patterns and support more effective campaign targeting.
 
-## Project overview
+## Project Overview
 
 | Item | Details |
 |---|---|
-| Problem | Binary classification |
-| Domain | Banking / Marketing Analytics / Customer Targeting |
-| Dataset | UCI Bank Marketing (`bank-additional-full.csv`) |
-| Target | `y`, renamed to `target` (`yes` = 1, `no` = 0) |
+| Project domain | Banking, Marketing Analytics and Customer Targeting |
+| Problem type | Binary classification |
+| Dataset | UCI Bank Marketing – `bank-additional-full.csv` |
+| Target variable | `y` (renamed to `target`; `yes` = 1, `no` = 0) |
 | Models | Logistic Regression and Random Forest |
-| Metrics | Accuracy, Precision, Recall, F1-score, ROC-AUC |
-| Tools | Python, Pandas, NumPy, Matplotlib, scikit-learn, Jupyter Notebook |
+| Evaluation metrics | Accuracy, Precision, Recall, F1-score and ROC-AUC |
+| Tools and libraries | Python, Pandas, NumPy, Matplotlib, Scikit-learn and Jupyter Notebook |
 
-## Business problem
+## Business Problem
 
-Banks use direct-marketing campaigns to encourage customers to subscribe to term deposits. Calling every customer consumes time and resources. A classification model can help estimate which customers are more likely to subscribe and help campaign teams prioritise outreach. The model is a decision-support tool; the best decision threshold depends on contact costs, campaign capacity and the value of a successful subscription.
+Banks use direct-marketing campaigns, such as telephone calls, to encourage customers to subscribe to term deposits. Contacting every customer can require considerable time and resources. A predictive model can help estimate which customers are more likely to subscribe, allowing campaign teams to prioritise outreach more effectively.
+
+The objective of this project is to use historical customer, campaign and economic information to predict the subscription response (`yes` or `no`). The model is intended as a decision-support tool; the final campaign strategy and prediction threshold should depend on factors such as contact costs, available campaign capacity and the value of a successful subscription.
 
 ## Dataset
 
-The supplied `bank-additional-full.csv` contains **41,188 rows and 21 columns**. The raw target distribution is 36,548 `no` and 4,640 `yes` (approximately 88.7% vs. 11.3%), so the outcome is imbalanced. The CSV is semicolon-separated. The notebook removes 12 exact duplicate rows, leaving **41,176 rows**.
+The project uses the **Bank Marketing** dataset, specifically `bank-additional-full.csv`, from the UCI Machine Learning Repository.
 
-Variables cover customer demographics, contact and campaign history, economic indicators and the subscription outcome.
+- Original dataset size: **41,188 rows and 21 columns**.
+- Duplicate records identified: **12**.
+- Records after removing exact duplicates: **41,176**.
+- Target distribution after cleaning:
+  - `no`: **36,537** (approximately **88.73%**)
+  - `yes`: **4,639** (approximately **11.27%**)
+- The CSV file is semicolon-separated (`;`).
 
-## Important modelling decisions
+The variables include customer demographics, contact information, campaign history, previous campaign outcomes and economic indicators. The target records whether the customer subscribed to a term deposit.
 
-- **Avoiding data leakage:** `duration` is excluded because call duration is only known after the call. It would not be available when deciding whom to contact before a call.
-- **Handling `pdays`:** the value `999` represents no previous contact in an earlier campaign. The notebook creates `previously_contacted` and removes `pdays`, avoiding treating 999 as an ordinary number of days.
-- **Unknown categories:** recorded `unknown` values are retained as categories rather than automatically treated as missing values.
-- **Train/test separation:** preprocessing is fitted on training data and applied to test data through scikit-learn pipelines.
+## Project Workflow
 
-## Workflow
+1. Import the required Python libraries and load the dataset.
+2. Inspect the dataset structure, data types, missing values and duplicate records.
+3. Remove exact duplicate rows and encode the target variable as 0 and 1.
+4. Perform exploratory data analysis to understand the response distribution and subscription rates across customer groups and campaign months.
+5. Create useful features, including `age_group` and `previously_contacted`.
+6. Prepare the feature matrix and target variable.
+7. Split the data into training and testing sets using an 80:20 split with stratification (`random_state=42`).
+8. Build preprocessing pipelines for numerical and categorical variables.
+9. Train Logistic Regression and Random Forest classifiers using balanced class weights.
+10. Evaluate both models using classification metrics, confusion matrices, classification reports, ROC curves and feature importance.
+11. Interpret the results in the context of marketing campaign planning.
 
-1. Load and inspect the data (shape, columns, types, missing values and duplicates).
-2. Remove exact duplicates and encode the target as 0/1.
-3. Explore response distribution and subscription rates by age group, job, education and month.
-4. Create `age_group` and `previously_contacted` features.
-5. Exclude `duration` and replace `pdays` with the contact-history indicator.
-6. Split into 80% training and 20% test sets using stratification (`random_state=42`).
-7. Preprocess numeric and categorical features.
-8. Train Logistic Regression and Random Forest using balanced class weights.
-9. Compare metrics, confusion matrices, classification reports, ROC curves and Random Forest feature importance.
-10. Translate patterns into campaign-planning considerations.
+## Exploratory Data Analysis
 
-## Exploratory data analysis
+### 1. Campaign Response Distribution
 
-### Campaign response distribution
+The target variable is imbalanced: approximately 88.73% of customers did not subscribe, while 11.27% subscribed. This class imbalance makes it important to evaluate the models using metrics beyond accuracy.
 
-The positive subscription class is the minority class.
+![Distribution of campaign response](IMAGES/figure_10.png)
 
-![Distribution of campaign response](images/figure_10.png)
+### 2. Subscription Rate by Age Group
 
-### Subscription rate by age group
+The `60+` age group has the highest observed subscription rate among the age bands created in the notebook (**45.54%**).
 
-![Subscription rate by age group](images/figure_12.png)
+![Subscription rate by age group](IMAGES/figure_12.png)
 
-### Subscription rate by job category
+### 3. Subscription Rate by Job Category
 
-![Subscription rate by job category](images/figure_14.png)
+In the job-category comparison, students (**31.43%**) and retired customers (**25.26%**) show the highest observed subscription rates among the displayed categories.
 
-### Subscription rate by education
+![Subscription rate by job category](IMAGES/figure_14.png)
 
-![Subscription rate by education](images/figure_16.png)
+### 4. Subscription Rate by Education
 
-### Subscription rate by campaign month
+The chart compares observed subscription rates across the education categories in the dataset.
 
-![Subscription rate by month](images/figure_18.png)
+![Subscription rate by education](IMAGES/figure_16.png)
 
-**Selected descriptive observations from the notebook:**
-- The `60+` age group has the highest observed subscription rate among the defined age bands (**45.54%**).
-- `student` (**31.43%**) and `retired` (**25.26%**) are the highest-response job categories in the displayed top-five comparison.
-- March (**50.55%**), December (**48.90%**), September (**44.91%**) and October (**43.93%**) show the highest observed monthly rates.
+### 5. Subscription Rate by Campaign Month
 
-These are associations in this historical dataset, not evidence that these attributes cause subscription.
+March (**50.55%**), December (**48.90%**), September (**44.91%**) and October (**43.93%**) show the highest observed subscription rates in the monthly comparison.
 
-## Modelling and preprocessing
+![Subscription rate by campaign month](IMAGES/figure_18.png)
 
-Numeric columns are median-imputed and standardised. Categorical columns are imputed with the most frequent category and one-hot encoded. The transformations are placed in a `ColumnTransformer` and fitted on the training set.
+These findings describe associations in the historical dataset. They do not establish that age, occupation, education or campaign month causes a customer to subscribe.
 
-**Logistic Regression:** baseline linear classifier, `class_weight="balanced"`, `max_iter=1000`.
+## Feature Engineering and Modelling Decisions
 
-**Random Forest:** 150 trees, `max_depth=12`, `min_samples_split=5`, `min_samples_leaf=2`, `class_weight="balanced"`.
+### Feature Engineering
 
-## Model results
+- **`age_group`:** Age is grouped into four categories: `18-30`, `31-45`, `46-60` and `60+` to make customer-segment comparisons easier.
+- **`previously_contacted`:** In the dataset, `pdays = 999` indicates that the customer was not previously contacted in an earlier campaign. The notebook creates a binary indicator (`1` if previously contacted, otherwise `0`) and removes `pdays` so that 999 is not treated as an ordinary number of days.
 
-Held-out test-set results from the notebook (rounded to three decimal places):
+### Avoiding Data Leakage
+
+The `duration` variable is excluded from model training because it represents the duration of the current call and is only known after the call has taken place. Including it would introduce information that would not be available when selecting customers to contact before a campaign call.
+
+### Train-Test Split
+
+The cleaned data is divided into:
+
+- **80% training data:** 32,940 records.
+- **20% testing data:** 8,236 records.
+
+The split uses `stratify=y` to preserve the target-class proportions in both sets.
+
+### Data Preprocessing
+
+Preprocessing is implemented using Scikit-learn pipelines and a `ColumnTransformer`:
+
+- **Numerical features:** missing values are imputed using the median and features are standardised using `StandardScaler`.
+- **Categorical features:** missing values are imputed using the most frequent category and variables are encoded using `OneHotEncoder`.
+- Preprocessing is fitted on the training data and then applied to the test data to avoid information leakage from the test set.
+- Recorded `unknown` categories are retained as categories rather than automatically treated as missing values.
+
+## Machine Learning Models
+
+Two classification algorithms are trained and compared:
+
+### 1. Logistic Regression
+
+Used as a baseline classification model. The model uses `class_weight="balanced"` and `max_iter=1000` to account for the imbalanced target and support convergence.
+
+### 2. Random Forest
+
+An ensemble model that combines multiple decision trees and can capture non-linear patterns. The notebook uses the following settings:
+
+- `n_estimators=150`
+- `max_depth=12`
+- `min_samples_split=5`
+- `min_samples_leaf=2`
+- `class_weight="balanced"`
+- `random_state=42`
+
+## Model Evaluation and Results
+
+The models are evaluated on the held-out test set using Accuracy, Precision, Recall, F1-score and ROC-AUC.
 
 | Model | Accuracy | Precision | Recall | F1-score | ROC-AUC |
 |---|---:|---:|---:|---:|---:|
 | Logistic Regression | 0.830 | 0.358 | **0.642** | 0.460 | 0.800 |
 | Random Forest | **0.861** | **0.423** | 0.633 | **0.507** | **0.812** |
 
-Random Forest performs better on accuracy, precision, F1-score and ROC-AUC in this run. Logistic Regression has slightly higher recall. Since the target is imbalanced, accuracy alone is not sufficient for model selection.
+**Interpretation:** Random Forest achieves higher accuracy, precision, F1-score and ROC-AUC in this experiment. Logistic Regression achieves slightly higher recall, identifying a marginally greater proportion of actual subscribers. Since the target classes are imbalanced, accuracy alone is not sufficient for selecting a model.
 
-- **Precision:** among customers predicted as subscribers, how many actually subscribed.
-- **Recall:** among actual subscribers, how many the model identified.
-- **F1-score:** harmonic balance between precision and recall.
-- **ROC-AUC:** ranking/discrimination performance across thresholds.
+- **Accuracy:** proportion of all predictions that are correct.
+- **Precision:** proportion of predicted subscribers who actually subscribed.
+- **Recall:** proportion of actual subscribers identified by the model.
+- **F1-score:** harmonic mean of precision and recall.
+- **ROC-AUC:** measures how well the model distinguishes between the two classes across classification thresholds.
 
-### Confusion matrices
+### Confusion Matrix Comparison
 
-![Confusion matrix comparison](images/figure_30.png)
+![Confusion matrix comparison for Logistic Regression and Random Forest](IMAGES/figure_30.png)
 
-### ROC curves
+### ROC Curve
 
-![ROC curve comparison](images/figure_34.png)
+![ROC curve comparison](IMAGES/figure_34.png)
 
-### Random Forest feature importance
+### Random Forest Feature Importance
 
-The feature-importance chart describes model behaviour; it does not prove that a feature causes subscription.
+The feature-importance chart shows which transformed input features contributed most to the Random Forest model's predictions. In this run, economic indicators such as `euribor3m`, `nr.employed` and `emp.var.rate` appear among the most important features.
 
-![Top Random Forest feature importances](images/figure_36.png)
+Feature importance describes the model's predictive behaviour; it does not establish a causal relationship.
 
-## Business interpretation
+![Top Random Forest feature importances](IMAGES/figure_36.png)
 
-- Use predicted probabilities to rank customers and prioritise a calling list.
-- Balance the number of likely subscribers identified against the number of unsuccessful calls.
-- Choose a decision threshold based on campaign capacity, contact cost and subscription value.
-- Validate segment patterns on newer campaign data before using them operationally.
-- Monitor performance because customer behaviour and economic conditions can change.
+## Business Interpretation and Recommendations
 
-A higher-recall model may capture more actual subscribers but can also create more false positives. A higher-precision model may reduce unsuccessful calls but miss potential subscribers. The business objective should determine the trade-off.
+The results suggest several ways a bank could use this type of analysis:
 
-## Repository structure
+1. **Prioritise customer outreach:** use predicted probabilities to rank customers and help campaign teams organise calling lists.
+2. **Consider customer segments:** review subscription patterns across age groups, job categories and campaign months when planning and evaluating campaigns.
+3. **Balance precision and recall:** a higher-recall model may identify more potential subscribers but can also lead to more unsuccessful calls. A higher-precision model may reduce unnecessary calls but miss some potential subscribers.
+4. **Select an appropriate threshold:** choose a decision threshold based on campaign capacity, contact costs and the value of a successful subscription.
+5. **Validate on newer data:** check whether the patterns and model performance remain consistent in more recent campaigns before operational use.
+
+## Repository Structure
+
+The repository is organised as follows:
 
 ```text
-Marketing-Campaign-Response-Prediction/
+MARKETING-CAMPAIGN-RESPONSE-PREDICTION/
+│
+├── IMAGES/
+│   ├── figure_10.png
+│   ├── figure_12.png
+│   ├── figure_14.png
+│   ├── figure_16.png
+│   ├── figure_18.png
+│   ├── figure_30.png
+│   ├── figure_34.png
+│   └── figure_36.png
+│
+├── Marketing_Campaign_Response_Prediction_Simplified.ipynb
 ├── README.md
-├── requirements.txt
-├── Marketing_Campaign_Response_Prediction.ipynb
-├── bank-additional-full.csv
-└── images/
-    ├── figure_10.png
-    ├── figure_12.png
-    ├── figure_14.png
-    ├── figure_16.png
-    ├── figure_18.png
-    ├── figure_30.png
-    ├── figure_34.png
-    └── figure_36.png
+└── bank-additional-full.csv
 ```
 
-## Run locally
+**Note:** The image directory is named `IMAGES` in uppercase. All image links in this README therefore use the exact case-sensitive path format `IMAGES/figure_name.png` so that they render correctly on GitHub.
 
-1. Clone/download this repository and open its folder.
-2. Install dependencies:
+## How to Run the Project
 
-```bash
-pip install -r requirements.txt
-```
+1. Clone the repository:
 
-3. Start Jupyter:
+   ```bash
+   git clone https://github.com/satsang-it/MARKETING-CAMPAIGN-RESPONSE-PREDICTION.git
+   ```
 
-```bash
-jupyter notebook
-```
+2. Open the repository folder and install the required libraries:
 
-4. Open `Marketing_Campaign_Response_Prediction.ipynb` and run cells from top to bottom. Keep `bank-additional-full.csv` beside the notebook. The notebook has been updated to use a portable relative file path.
+   ```bash
+   pip install pandas numpy matplotlib scikit-learn jupyter
+   ```
 
-## Limitations and future work
+3. Launch Jupyter Notebook:
 
-- Results are based on one stratified random train/test split; cross-validation and time-based validation would provide stronger evidence of generalisation.
-- Metrics use the notebook's default prediction threshold. Threshold tuning should use validation data and an explicit business-cost framework.
-- Historical customer behaviour and economic conditions may change.
-- Feature importance and segment comparisons are not causal explanations.
-- A real deployment would need monitoring, periodic validation/retraining, privacy and fairness review, and business approval of the operating threshold.
+   ```bash
+   jupyter notebook
+   ```
 
-Possible extensions: probability calibration, cross-validation, threshold optimisation, lift/gains analysis, cost-sensitive evaluation and testing on newer campaign data.
+4. Open `Marketing_Campaign_Response_Prediction_Simplified.ipynb` and run the cells from top to bottom.
 
-## Dataset reference
+Keep `bank-additional-full.csv` in the same directory as the notebook. The notebook expects the dataset to be semicolon-separated.
 
-This project uses the Bank Marketing dataset associated with the [UCI Machine Learning Repository](https://archive.ics.uci.edu/dataset/222/bank+marketing). Retain the original dataset attribution and check its usage terms before redistribution.
+## Limitations and Future Improvements
+
+- The reported results are based on one stratified random train-test split. Cross-validation and time-based validation could provide stronger evidence of generalisation.
+- The models use their default classification decision thresholds. Threshold tuning should be carried out using validation data and a clear business-cost framework.
+- Customer behaviour and economic conditions may change over time, so model performance should be monitored on newer campaign data.
+- Feature importance and customer-segment comparisons show associations and predictive patterns, not causal effects.
+- Before real-world use, the model would require additional validation, monitoring, privacy and fairness reviews, and business approval.
+
+Possible extensions include probability calibration, cross-validation, threshold optimisation, lift and gains analysis, cost-sensitive evaluation and testing on newer campaign data.
+
+## Dataset Reference
+
+This project uses the **Bank Marketing** dataset from the [UCI Machine Learning Repository](https://archive.ics.uci.edu/dataset/222/bank+marketing). Please retain the dataset attribution and review the repository's terms of use when redistributing the data.
 
 ## Disclaimer
 
-Educational and portfolio project only. It is not a production banking decision system and should not be used for real customer decisions without further validation, governance and compliance review.
+This is an educational and portfolio project. It is not a production banking decision system and should not be used to make real customer decisions without further validation, governance and compliance review.
