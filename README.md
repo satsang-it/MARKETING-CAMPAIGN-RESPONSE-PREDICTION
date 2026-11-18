@@ -1,4 +1,8 @@
 # Marketing Campaign Response Prediction & Customer Targeting
+![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
+![Domain](https://img.shields.io/badge/Domain-Marketing%20Analytics-teal)
+![ML](https://img.shields.io/badge/Task-Binary%20Classification-orange)
+![Status](https://img.shields.io/badge/Status-Research%20Project-lightgrey)
 
 A machine learning project that predicts whether a bank customer is likely to subscribe to a term deposit following a direct-marketing campaign. The project uses exploratory data analysis, feature engineering, data preprocessing, classification models and model evaluation to identify customer-response patterns and support more effective campaign targeting.
 
